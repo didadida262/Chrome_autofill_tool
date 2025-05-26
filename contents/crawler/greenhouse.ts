@@ -4,6 +4,7 @@ import type { PlasmoCSConfig } from "plasmo"
 import type { Education, WorkExperienceItem } from "~core/types"
 
 import { executeSequentially, type ExecutableFunction } from "./utils/executor"
+import mockData from '../../mocks/mock.json'
 
 // 要求
 /**
@@ -52,12 +53,12 @@ const getLabelForElement = (element: HTMLElement) => {
   return null
 }
 
-// 清理标签文本，去除换行符和多余空格
 const cleanLabelText = (text: string) => {
   return text
-    .replace(/[\n\r]/g, " ") // 替换换行符为空格
-    .replace(/\s+/g, " ") // 合并连续空格
-    .trim() // 去除首尾空格
+    .replace(/[\n\r*]/g, " ")      // 替换换行符和星号为空格
+    .replace(/[^\w\s]/g, "")       // 移除所有非字母数字和空格的字符
+    .replace(/\s+/g, " ")          // 合并连续空格
+    .trim();                       // 去除首尾空格
 }
 
 type TRule = { label: string; type: string; options?: string[] }
@@ -139,7 +140,6 @@ export class GreenhouseAutoFill {
         })
       }
     })
-    console.log("result>>>1", result)
     this.formRules = result
     return result
   }
@@ -147,6 +147,7 @@ export class GreenhouseAutoFill {
   async fillForm() {
     this.extractFields()
     console.log("this.formRules", this.formRules)
+    console.log('mockData>>>', mockData)
 
     // TODO: 2. 结合extractFields 将 mock 数据填入到页面中
     // 实现 getFormElementExecutor 方法 生成每条执行的action
