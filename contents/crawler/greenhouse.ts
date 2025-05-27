@@ -3,8 +3,8 @@ import type { PlasmoCSConfig } from "plasmo"
 
 import type { Education, WorkExperienceItem } from "~core/types"
 
+import mockData from "../../mocks/mock.json"
 import { executeSequentially, type ExecutableFunction } from "./utils/executor"
-import mockData from '../../mocks/mock.json'
 
 // 要求
 /**
@@ -21,30 +21,31 @@ import mockData from '../../mocks/mock.json'
 
 // 辅助方法：获取元素对应的标签文本并清理格式
 const getLabelForElement = (element: HTMLElement) => {
-  // 方法1：通过for属性关联的label
-  if (element.id) {
-    const label = document.querySelector(`label[for="${element.id}"]`)
-    if (label) {
-      const text = label.textContent?.trim() || ""
-      return cleanLabelText(text)
-    }
-  }
+  //   // 方法1：通过for属性关联的label
+  //   if (element.id) {
+  //     const label = document.querySelector(`label[for="${element.id}"]`)
+  //     if (label) {
+  //       const text = label.textContent?.trim() || ""
+  //       return cleanLabelText(text)
+  //     }
+  //   }
 
-  // 方法2：直接包裹在label内的元素
-  let parent = element.parentElement
-  while (parent) {
-    if (parent.tagName.toLowerCase() === "label") {
-      const text = parent.textContent?.trim() || ""
-      return cleanLabelText(text)
-    }
-    parent = parent.parentElement
-  }
+  //   // 方法2：直接包裹在label内的元素
+  //   let parent = element.parentElement
+  //   while (parent) {
+  //     if (parent.tagName.toLowerCase() === "label") {
+  //       const text = parent.textContent?.trim() || ""
+  //       return cleanLabelText(text)
+  //     }
+  //     parent = parent.parentElement
+  //   }
 
   // 方法3：查找前面的label元素
   let previousElement = element.previousElementSibling
   while (previousElement) {
     if (previousElement.tagName.toLowerCase() === "label") {
       const text = previousElement.textContent?.trim() || ""
+      console.log("cleanLabelText(text)>>>", cleanLabelText(text))
       return cleanLabelText(text)
     }
     previousElement = previousElement.previousElementSibling
@@ -55,10 +56,10 @@ const getLabelForElement = (element: HTMLElement) => {
 
 const cleanLabelText = (text: string) => {
   return text
-    .replace(/[\n\r*]/g, " ")      // 替换换行符和星号为空格
-    .replace(/[^\w\s]/g, "")       // 移除所有非字母数字和空格的字符
-    .replace(/\s+/g, " ")          // 合并连续空格
-    .trim();                       // 去除首尾空格
+    .replace(/[\n\r*]/g, " ") // 替换换行符和星号为空格
+    .replace(/[^\w\s]/g, "") // 移除所有非字母数字和空格的字符
+    .replace(/\s+/g, " ") // 合并连续空格
+    .trim() // 去除首尾空格
 }
 
 type TRule = { label: string; type: string; options?: string[] }
@@ -69,13 +70,14 @@ export class GreenhouseAutoFill {
     // TODO: 1. 实现提取字段的包含要求1里面的信息
     const result: TRule[] = []
 
-    // 定义不同类型表单元素的选择器
     const formElementSelectors = [
-      'input:not([type="hidden"])',
+      'input[type="text"]',
+      'input[type="email"]',
+      'input[type="tel"]',
+      'input[type="number"]',
+      'input[type="password"]',
       "select",
-      "textarea",
-      'input[type="radio"]',
-      'input[type="checkbox"]'
+      "textarea"
     ].join(", ")
 
     // 获取所有表单元素
@@ -86,44 +88,22 @@ export class GreenhouseAutoFill {
 
     formElements.forEach((element: any) => {
       // 获取元素的标签文本
+      console.warn(">>>>>>>>>>>>>>>>>>>>>>>>>>>>start")
       const label = getLabelForElement(element)
       if (!label) return
+      console.log("element>>>", element)
+      console.log("element.id>>>", element.id)
+      console.log("element.type>>>", element.type)
+      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>end")
 
       // 处理不同类型的表单元素
       if (element instanceof HTMLInputElement) {
-        if (element.type === "radio") {
-          // 处理单选按钮组
-          const radioGroupName = element.name
-          if (radioGroupName && !processedRadioGroups.has(radioGroupName)) {
-            processedRadioGroups.add(radioGroupName)
-            const radioGroupOptions = Array.from(
-              document.querySelectorAll(
-                `input[type="radio"][name="${radioGroupName}"]`
-              )
-            ).map((radio: any) => {
-              const radioLabel = getLabelForElement(radio) || radio.value
-              return radioLabel
-            })
-
-            result.push({
-              label,
-              type: "radio",
-              options: radioGroupOptions
-            })
-          }
-        } else if (element.type === "checkbox") {
-          // 处理复选框
-          result.push({
-            label,
-            type: "checkbox"
-          })
-        } else {
-          // 处理其他类型的输入框
-          result.push({
-            label,
-            type: element.type || "text"
-          })
-        }
+        //   屏蔽下拉框的input
+        if (element.className.includes("select")) return
+        result.push({
+          label,
+          type: element.type || "text"
+        })
       } else if (element instanceof HTMLSelectElement) {
         // 处理下拉框
         const options = Array.from(element.options).map((option) => option.text)
@@ -147,7 +127,7 @@ export class GreenhouseAutoFill {
   async fillForm() {
     this.extractFields()
     console.log("this.formRules", this.formRules)
-    console.log('mockData>>>', mockData)
+    console.log("mockData>>>", mockData)
 
     // TODO: 2. 结合extractFields 将 mock 数据填入到页面中
     // 实现 getFormElementExecutor 方法 生成每条执行的action
