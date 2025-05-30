@@ -3,6 +3,7 @@ import type { PlasmoCSConfig } from "plasmo"
 
 import type { Education, WorkExperienceItem } from "~core/types"
 
+// 没有的项:Degree、Discipline、Security Code
 import mockData from "../../mocks/mock.json"
 import { executeSequentially, type ExecutableFunction } from "./utils/executor"
 
@@ -57,7 +58,6 @@ const getLabelForElement = (element: HTMLElement) => {
 const cleanLabelText = (text: string) => {
   return text
     .replace(/[\n\r*]/g, " ") // 替换换行符和星号为空格
-    .replace(/[^\w\s]/g, "") // 移除所有非字母数字和空格的字符
     .replace(/\s+/g, " ") // 合并连续空格
     .trim() // 去除首尾空格
 }
@@ -89,12 +89,14 @@ export class GreenhouseAutoFill {
     formElements.forEach((element: any) => {
       // 获取元素的标签文本
       console.warn(">>>>>>>>>>>>>>>>>>>>>>>>>>>>start")
-      const label = getLabelForElement(element)
-      if (!label) return
       console.log("element>>>", element)
       console.log("element.id>>>", element.id)
       console.log("element.type>>>", element.type)
+      const label = getLabelForElement(element)
+      console.log("element.label>>>", label)
       console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>end")
+
+      if (!label) return
 
       // 处理不同类型的表单元素
       if (element instanceof HTMLInputElement) {
