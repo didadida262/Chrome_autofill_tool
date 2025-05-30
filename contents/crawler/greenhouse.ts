@@ -22,36 +22,37 @@ import { executeSequentially, type ExecutableFunction } from "./utils/executor"
 
 // 辅助方法：获取元素对应的标签文本并清理格式
 const getLabelForElement = (element: HTMLElement) => {
-  //   // 方法1：通过for属性关联的label
-  //   if (element.id) {
-  //     const label = document.querySelector(`label[for="${element.id}"]`)
-  //     if (label) {
-  //       const text = label.textContent?.trim() || ""
-  //       return cleanLabelText(text)
-  //     }
-  //   }
-
-  //   // 方法2：直接包裹在label内的元素
-  //   let parent = element.parentElement
-  //   while (parent) {
-  //     if (parent.tagName.toLowerCase() === "label") {
-  //       const text = parent.textContent?.trim() || ""
-  //       return cleanLabelText(text)
-  //     }
-  //     parent = parent.parentElement
-  //   }
-
-  // 方法3：查找前面的label元素
+  if (element.id === "job_application_answers_attributes_0_text_value") {
+    console.warn("重点关注>>>>>>>>>>>>>>>>>")
+    console.warn("重点关注>>>>>>>>>>>>>>>>>")
+    console.warn("重点关注>>>>>>>>>>>>>>>>>")
+  }
+  // 格式1：名称为兄弟节点且为<label></label>包裹
   let previousElement = element.previousElementSibling
   while (previousElement) {
+    if (element.id === "job_application_answers_attributes_0_text_value") {
+      console.log("previousElement>>1", previousElement)
+      console.log("previousElement>>", previousElement.textContent)
+    }
+
     if (previousElement.tagName.toLowerCase() === "label") {
       const text = previousElement.textContent?.trim() || ""
-      console.log("cleanLabelText(text)>>>", cleanLabelText(text))
+      return cleanLabelText(text)
+    } else if (previousElement.textContent) {
+      const text = previousElement.textContent.trim() || ""
       return cleanLabelText(text)
     }
     previousElement = previousElement.previousElementSibling
   }
 
+  //   格式2：名称为兄弟节点但无标签包裹
+  let parent = element.parentElement
+  const firstChild = parent.firstChild
+  // 确保第一个子节点是文本节点（nodeType === 3）
+  if (firstChild && firstChild.nodeType === 3) {
+    const textContent = firstChild.textContent.trim()
+    return cleanLabelText(textContent)
+  }
   return null
 }
 
