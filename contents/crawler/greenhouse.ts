@@ -44,8 +44,12 @@ export class GreenhouseAutoFill {
       // 获取元素的标签文本
       const label = getLabelForElement(element)
       if (!label) return
+      // 针对field的所有输入框、选择框，需要单独处理
       if (!isInMock(label)) return
-      if (element instanceof HTMLInputElement) {
+      if (element.parentElement.parentElement.tagName.toLowerCase() === 'fieldset') {
+        // 教育信息
+        console.log('educations>>>>')
+      }else if (element instanceof HTMLInputElement) {
         if (element.className.includes("select")) return
         result.push({
           label,
