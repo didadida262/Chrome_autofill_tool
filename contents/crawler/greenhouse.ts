@@ -1,11 +1,10 @@
+
 import dayjs from "dayjs"
 import type { PlasmoCSConfig } from "plasmo"
 
-import type { Education, WorkExperienceItem } from "~core/types"
-
-// 没有的项:Degree、Discipline、Security Code
-import mockData from "../../mocks/mock.json"
+import { getLabelForElement, getTargetVal, isInMock } from "./utils/common"
 import { executeSequentially, type ExecutableFunction } from "./utils/executor"
+import type { Education, WorkExperienceItem } from "~core/types"
 
 // 要求
 /**
@@ -19,58 +18,14 @@ import { executeSequentially, type ExecutableFunction } from "./utils/executor"
  *
  * 3. 填充完成后统计完成情况。
  */
-
-// 辅助方法：获取元素对应的标签文本并清理格式
-const getLabelForElement = (element: HTMLElement) => {
-  if (element.id === "job_application_answers_attributes_0_text_value") {
-    console.warn("重点关注>>>>>>>>>>>>>>>>>")
-    console.warn("重点关注>>>>>>>>>>>>>>>>>")
-    console.warn("重点关注>>>>>>>>>>>>>>>>>")
-  }
-  // 格式1：名称为兄弟节点且为<label></label>包裹
-  let previousElement = element.previousElementSibling
-  while (previousElement) {
-    if (element.id === "job_application_answers_attributes_0_text_value") {
-      console.log("previousElement>>1", previousElement)
-      console.log("previousElement>>", previousElement.textContent)
-    }
-
-    if (previousElement.tagName.toLowerCase() === "label") {
-      const text = previousElement.textContent?.trim() || ""
-      return cleanLabelText(text)
-    } else if (previousElement.textContent) {
-      const text = previousElement.textContent.trim() || ""
-      return cleanLabelText(text)
-    }
-    previousElement = previousElement.previousElementSibling
-  }
-
-  //   格式2：名称为兄弟节点但无标签包裹
-  let parent = element.parentElement
-  const firstChild = parent.firstChild
-  // 确保第一个子节点是文本节点（nodeType === 3）
-  if (firstChild && firstChild.nodeType === 3) {
-    const textContent = firstChild.textContent.trim()
-    return cleanLabelText(textContent)
-  }
-  return null
-}
-
-const cleanLabelText = (text: string) => {
-  return text
-    .replace(/[\n\r*]/g, " ") // 替换换行符和星号为空格
-    .replace(/\s+/g, " ") // 合并连续空格
-    .trim() // 去除首尾空格
-}
+const originData = []
 
 type TRule = { label: string; type: string; options?: string[] }
 export class GreenhouseAutoFill {
   formRules: TRule[]
   extractFields(): TRule[] {
-    console.log("extractFields>>>>>")
     // TODO: 1. 实现提取字段的包含要求1里面的信息
     const result: TRule[] = []
-
     const formElementSelectors = [
       'input[type="text"]',
       'input[type="email"]',
@@ -83,37 +38,38 @@ export class GreenhouseAutoFill {
 
     // 获取所有表单元素
     const formElements = document.querySelectorAll(formElementSelectors)
-
     // 用于存储已处理的单选按钮组，避免重复处理
     const processedRadioGroups = new Set<string>()
-
     formElements.forEach((element: any) => {
       // 获取元素的标签文本
-      console.warn(">>>>>>>>>>>>>>>>>>>>>>>>>>>>start")
-      console.log("element>>>", element)
-      console.log("element.id>>>", element.id)
-      console.log("element.type>>>", element.type)
       const label = getLabelForElement(element)
-      console.log("element.label>>>", label)
-      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>end")
-
       if (!label) return
-
-      // 处理不同类型的表单元素
+      if (!isInMock(label)) return
       if (element instanceof HTMLInputElement) {
-        //   屏蔽下拉框的input
         if (element.className.includes("select")) return
         result.push({
           label,
           type: element.type || "text"
         })
+        originData.push({
+          label,
+          type: element.type || "text",
+          dom: element
+        })
+        
       } else if (element instanceof HTMLSelectElement) {
         // 处理下拉框
-        const options = Array.from(element.options).map((option) => option.text)
+        const options = Array.from(element.options).filter((item) => item.value).map((option) => option.value &&option.text)
         result.push({
           label,
           type: "select",
           options
+        })
+        originData.push({
+          label,
+          type: "select",
+          options,
+          dom: element
         })
       } else if (element instanceof HTMLTextAreaElement) {
         // 处理文本区域
@@ -121,19 +77,44 @@ export class GreenhouseAutoFill {
           label,
           type: "textarea"
         })
+        originData.push({
+          label,
+          type: "textarea",
+          dom: element
+        })
       }
     })
-    this.formRules = result
+    this.formRules = [...result]
+    console.log('this.formRules>>>>', this.formRules)
     return result
   }
 
-  async fillForm() {
-    this.extractFields()
-    console.log("this.formRules", this.formRules)
-    console.log("mockData>>>", mockData)
+   fillText (item)  {
+      item.dom.value = getTargetVal(item.label)
+   }
+   fillSelect(item)  {
+    const value = getTargetVal(item.label)[0]
+     const parentNode = item.dom.parentNode
+     if (!parentNode) return
+     const valueContainer = parentNode.querySelector('.select2-container');
+     if (!valueContainer) return
+     const aTag = valueContainer.querySelectorAll('a')[0]; // 返回 NodeList
+     if (!aTag) return
+     const tar = aTag.querySelector('.select2-chosen');
+     tar.textContent = value
+  }
 
+  async fillForm() {
     // TODO: 2. 结合extractFields 将 mock 数据填入到页面中
     // 实现 getFormElementExecutor 方法 生成每条执行的action
+    this.extractFields() 
+    originData.forEach((item) => {
+      if (item.type === 'text') {
+        this.fillText(item)
+      } else if (item.type === 'select') {
+        this.fillSelect(item)
+      }
+   })
     const sequenceFuncCollector = []
     for (let rule of this.formRules) {
       const action = this.getFormElementExecutor(rule)
@@ -150,6 +131,7 @@ export class GreenhouseAutoFill {
 
   handleFilledInfo() {
     // TODO: 3. 统计完成情况
+    // 获取dom值，跟真实值匹配
   }
 
   // 填充时需要的一些基础方法

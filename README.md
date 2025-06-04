@@ -1,5 +1,3 @@
-# Chrome_autofill_tool
-
 # JobRight Helper - 面试任务
 
 ## 项目概述
@@ -20,8 +18,13 @@
 
 基于给定的mock数据，和现有的代码框架，请填充现在的代码框架，保证用mock数据在下面的链接能跑通，自动填充数据：
 
-1. https://boards.greenhouse.io/embed/job_app?token=6548338003&utm_source=jobright&jr_id=68029fc88bc5903389e9c3cb
-   对应问题能够自动填写上去答案。
+1. 测试链接1：
+   链接：https://boards.greenhouse.io/embed/job_app?token=4689953007&utm_source=jobright&jr_id=67f1889fd82de3d6e76d1eed
+   对应mock数据：mocks/4689953007.json
+2. 测试链接2：
+   链接：https://boards.greenhouse.io/embed/job_app?token=4719435007&utm_source=jobright&jr_id=68107cf0b4ee1eab26bb6272
+   对应mock数据：mocks/4719435007.json
+3.
 
 ### 实现细节：
 

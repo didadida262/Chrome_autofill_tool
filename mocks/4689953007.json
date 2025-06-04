@@ -1,0 +1,73 @@
+[
+  {
+    "name": "Are you legally authorized to work in the United States (as in, you are a US citizen, US permanent resident, or in the US with a worker's Visa or Employment Authorization)?",
+    "value": ["Yes"]
+  },
+  {
+    "name": "Do you currently or have you ever worked for Lasko Products or any of its associated companies?",
+    "value": ["No"]
+  },
+  {
+    "name": "Are you over the age of 18?",
+    "value": ["Yes"]
+  },
+  {
+    "name": "Gender",
+    "value": ["Decline To Self Identify"]
+  },
+  {
+    "name": "Are you Hispanic/Latino?",
+    "value": ["Decline To Self Identify"]
+  },
+  {
+    "name": "Please identify your race",
+    "value": ["Decline To Self Identify"]
+  },
+  {
+    "name": "Veteran Status",
+    "value": ["I am not a protected veteran"]
+  },
+  {
+    "name": "Disability Status",
+    "value": ["I do not want to answer"]
+  },
+  {
+    "name": "First Name",
+    "value": "Daniel"
+  },
+  {
+    "name": "Last Name",
+    "value": "Wang"
+  },
+  {
+    "name": "Email",
+    "value": "test@test.com"
+  },
+  {
+    "name": "Phone",
+    "value": "412-111-2222"
+  },
+  {
+    "Education": [
+      {
+        "Degree": "Master's Degree",
+        "Discipline": ["Communications & Film"],
+        "School": "San Jose State University",
+        "Study": "Communication Studies with an emphasis on New Media",
+        "Start": "2014-01-01",
+        "End": "2015-01-01",
+        "isCurrent": false
+      },
+      {
+        "Degree": "Bachelor's Degree",
+        "Discipline": ["Chemistry"],
+        "School": "Purdue University",
+        "Study": "Computer Science",
+        "Start": "2024-02-16",
+        "End": "2025-02-16",
+        "isCurrent": false,
+        "gpa": "4.5/5.0"
+      }
+    ]
+  }
+]
