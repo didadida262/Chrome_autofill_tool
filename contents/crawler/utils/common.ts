@@ -3,14 +3,14 @@
  * @Author: didadida262
  * @Date: 2025-06-04 09:34:56
  * @LastEditors: didadida262
- * @LastEditTime: 2025-06-04 16:29:22
+ * @LastEditTime: 2025-06-04 17:13:42
  */
 
 import mockDataA from '../../../mocks/4689953007.json'
 
 export const getTargetVal = (label: string) => {
   const targetItem = mockDataA.filter((item) => item.name === label)[0]
-  return targetItem.value
+  return targetItem?targetItem.value:null
 }
 
 export const getFirstTextNode = (element: HTMLElement): string => {

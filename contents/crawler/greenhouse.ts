@@ -91,6 +91,7 @@ export class GreenhouseAutoFill {
     })
     this.formRules = [...result]
     console.log('this.formRules>>>>', this.formRules)
+    console.log('this.originData>>>>', originData)
     return result
   }
 
@@ -98,7 +99,7 @@ export class GreenhouseAutoFill {
       item.dom.value = getTargetVal(item.label)
    }
    fillSelect(item)  {
-    const value = getTargetVal(item.label)[0]
+    const value = getTargetVal(item.label)?getTargetVal(item.label)[0]:''
      const parentNode = item.dom.parentNode
      if (!parentNode) return
      const valueContainer = parentNode.querySelector('.select2-container');
